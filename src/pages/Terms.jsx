@@ -6,7 +6,7 @@ const Terms = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-8">Terms & Conditions</h1>
             <p className="text-gray-600 mb-4">Last Updated: October 2024</p>
             <div className="prose max-w-none text-gray-700">
-                <p>Welcome to Indi Cabs. By using our website and services, you agree to comply with and be bound by the following terms and conditions.</p>
+                <p>Welcome to Indi Cabs, a service provided by Indiverse Enterprises Pvt Ltd. By using our website and services, you agree to comply with and be bound by the following terms and conditions.</p>
                 <h2 className="text-2xl font-semibold mt-6 mb-4">1. Acceptance of Terms</h2>
                 <p>By accessing or using our service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the service.</p>
                 <h2 className="text-2xl font-semibold mt-6 mb-4">2. Use of Service</h2>
