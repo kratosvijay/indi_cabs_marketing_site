@@ -8,6 +8,7 @@ import Contact from './pages/Contact';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Refund from './pages/Refund';
+import AccountDeletion from './pages/AccountDeletion';
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/refund" element={<Refund />} />
+                <Route path="/account-deletion" element={<AccountDeletion />} />
             </Routes>
             <Footer />
         </div>
