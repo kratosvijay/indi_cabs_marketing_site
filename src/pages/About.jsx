@@ -13,7 +13,7 @@ const About = () => {
             <div className="mt-12 p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Parent Company</h2>
                 <p className="text-lg text-gray-700">
-                    <strong>Indi Cabs</strong> is a proud venture of <strong>Indiverse Enterprises Pvt Ltd</strong>, a forward-thinking company dedicated to creating innovative solutions for modern challenges.
+                    <strong>Indi Cabs</strong> is a proud venture of <strong>INDIVERSE ENTERPRISES PRIVATE LIMITED</strong>, a forward-thinking company dedicated to creating innovative solutions for modern challenges.
                 </p>
             </div>
         </div>

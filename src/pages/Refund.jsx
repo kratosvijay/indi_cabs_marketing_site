@@ -6,7 +6,7 @@ const Refund = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-8">Refund Policy</h1>
             <p className="text-gray-600 mb-4">Last Updated: October 2024</p>
             <div className="prose max-w-none text-gray-700">
-                <p>At Indi Cabs (Indiverse Enterprises Pvt Ltd), we strive to provide the best service possible. However, if you are not satisfied with your ride or if there was an error in charging, we are here to help.</p>
+                <p>At Indi Cabs (INDIVERSE ENTERPRISES PRIVATE LIMITED), we strive to provide the best service possible. However, if you are not satisfied with your ride or if there was an error in charging, we are here to help.</p>
                 <h2 className="text-2xl font-semibold mt-6 mb-4">1. Cancellations</h2>
                 <p>You may cancel your ride at any time before the driver arrives. Cancellation fees may apply depending on how long the driver has been en route.</p>
                 <h2 className="text-2xl font-semibold mt-6 mb-4">2. Refunds</h2>

@@ -63,7 +63,7 @@ const Footer = () => {
 
                 <div className="pt-8 text-center text-gray-500 text-sm">
                     <p className="flex items-center justify-center gap-2">
-                        © 2024 Indiverse Enterprises Pvt Ltd. Made with <Heart size={16} className="text-red-500 fill-current" /> in India.
+                        © 2024 INDIVERSE ENTERPRISES PRIVATE LIMITED. Made with <Heart size={16} className="text-red-500 fill-current" /> in India.
                     </p>
                 </div>
             </div>
