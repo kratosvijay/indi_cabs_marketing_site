@@ -51,12 +51,17 @@ const Footer = () => {
                                     <div className="text-sm font-bold text-white">App Store</div>
                                 </div>
                             </button>
-                            <button className="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex items-center space-x-3 transition-colors">
+                            <a 
+                                href="https://play.google.com/store/apps/details?id=com.indicabs.userapp&hl=en_SG"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex items-center space-x-3 transition-colors"
+                            >
                                 <div className="text-left">
                                     <div className="text-xs text-gray-400">Get it on</div>
                                     <div className="text-sm font-bold text-white">Google Play</div>
                                 </div>
-                            </button>
+                            </a>
                         </div>
                     </div>
 

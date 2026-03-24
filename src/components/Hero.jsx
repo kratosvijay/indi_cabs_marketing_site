@@ -38,13 +38,18 @@ const Hero = () => {
                                 </div>
                             </button>
 
-                            <button className="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-400 to-indigo-400 text-white px-8 py-4 rounded-xl hover:opacity-90 transition-all transform hover:-translate-y-1 shadow-xl shadow-blue-500/30">
+                            <a 
+                                href="https://play.google.com/store/apps/details?id=com.indicabs.userapp&hl=en_SG"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-400 to-indigo-400 text-white px-8 py-4 rounded-xl hover:opacity-90 transition-all transform hover:-translate-y-1 shadow-xl shadow-blue-500/30"
+                            >
                                 <Play size={24} fill="currentColor" />
                                 <div className="text-left">
                                     <div className="text-xs text-white/80">GET IT ON</div>
                                     <div className="text-lg font-bold leading-none">Google Play</div>
                                 </div>
-                            </button>
+                            </a>
                         </div>
 
                         <div className="mt-10 flex items-center justify-center lg:justify-start gap-6 text-sm text-gray-500">

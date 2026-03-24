@@ -10,7 +10,7 @@ const AccountDeletion = () => {
                     <Trash2 className="text-red-600 w-10 h-10" />
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
-                    Delete Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">Indicabs</span> Account
+                    Delete Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Indicabs</span> Account
                 </h1>
                 <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
                     We're sorry to see you go. If you've decided to delete your account, we've made the process simple and transparent.
