@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.indicabs.userapp",
+      "sha256_cert_fingerprints": [
+        "C4:D5:0C:38:25:80:90:A0:AC:E1:47:96:99:F4:F2:65:8A:88:88:0C:B6:7F:2A:46:88:79:AC:30:43:B1:BF:7B"
+      ]
+    }
+  }
+]
