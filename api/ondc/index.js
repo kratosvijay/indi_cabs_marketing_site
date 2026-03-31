@@ -18,19 +18,24 @@ app.use((req, res, next) => {
 });
 
 // ─── Routes ─────────────────────────────────────────────────────────────
-// In Vercel, if this file is api/ondc/index.js, 
-// the requests to /api/ondc/* will be handled here.
-// The routes file expects /search, /select etc.
+// Compatibility for both root and versioned prefixes in Vercel
 app.use('/', ondcRoutes);
+app.use('/api/ondc', ondcRoutes);
+app.use('/ondc', ondcRoutes);
 
 // ─── Health Check ───────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
+const healthCheck = (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    service: 'Indicabs ONDC BNP'
+    service: 'Indicabs ONDC BNP',
+    path: req.url
   });
-});
+};
+
+app.get('/health', healthCheck);
+app.get('/api/ondc/health', healthCheck);
+app.get('/ondc/health', healthCheck);
 
 // ─── Error Handling ─────────────────────────────────────────────────────
 app.use(notFoundHandler);
