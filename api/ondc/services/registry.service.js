@@ -12,7 +12,7 @@ const REGISTRY_URL = process.env.ONDC_REGISTRY_URL || 'https://preprod.registry.
  * @param {string} subscriberId - The subscriber ID to look up
  * @returns {object} Subscriber details (mock for now)
  */
-async function lookupSubscriber(subscriberId) {
+export async function lookupSubscriber(subscriberId) {
   // TODO: Implement actual registry lookup
   // POST to REGISTRY_URL/lookup with subscriber_id
   console.log(`🔍 [Registry] Looking up subscriber: ${subscriberId} at ${REGISTRY_URL}`);
@@ -32,7 +32,7 @@ async function lookupSubscriber(subscriberId) {
  * @param {string} body - Raw request body
  * @returns {boolean} Whether the signature is valid
  */
-async function verifySignature(headers, body) {
+export async function verifySignature(headers, body) {
   // TODO: Implement signature verification using libsodium
   // 1. Extract Authorization header
   // 2. Look up sender's public key from registry
@@ -40,5 +40,3 @@ async function verifySignature(headers, body) {
   console.log('🔐 [Registry] Signature verification skipped (sandbox mode)');
   return true;
 }
-
-module.exports = { lookupSubscriber, verifySignature };

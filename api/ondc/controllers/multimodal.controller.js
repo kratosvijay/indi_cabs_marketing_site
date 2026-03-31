@@ -4,7 +4,7 @@
  * Generates combined transit options: Cab ONLY, Metro ONLY, or Cab + Metro.
  */
 
-function plan(req, res) {
+export function plan(req, res) {
   const { source, destination } = req.body;
 
   if (!source || !destination || !source.lat || !source.lng || !destination.lat || !destination.lng) {
@@ -58,4 +58,4 @@ function plan(req, res) {
   });
 }
 
-module.exports = { plan };
+// Named export used above

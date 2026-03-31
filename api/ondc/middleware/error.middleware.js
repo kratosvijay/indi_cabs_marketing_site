@@ -1,7 +1,4 @@
-/**
- * 404 Not Found handler
- */
-function notFoundHandler(req, res, _next) {
+export function notFoundHandler(req, res, _next) {
   console.log(`⚠️  404: ${req.method} ${req.originalUrl} not found`);
   res.status(404).json({
     error: {
@@ -15,7 +12,7 @@ function notFoundHandler(req, res, _next) {
 /**
  * Global error handler
  */
-function errorHandler(err, req, res, _next) {
+export function errorHandler(err, req, res, _next) {
   console.error('❌ Unhandled Error:', err.message);
   console.error(err.stack);
 
@@ -30,5 +27,3 @@ function errorHandler(err, req, res, _next) {
     },
   });
 }
-
-module.exports = { notFoundHandler, errorHandler };

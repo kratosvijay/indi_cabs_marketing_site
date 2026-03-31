@@ -5,7 +5,7 @@
  * Replace these with real ONDC gateway calls during full integration.
  */
 
-const { buildContext } = require('../utils/context.builder');
+import { buildContext } from '../utils/context.builder.js';
 
 // ─── Mock Metro Catalog ─────────────────────────────────────────────────
 const MOCK_METRO_CATALOG = {
@@ -77,7 +77,7 @@ const MOCK_METRO_CATALOG = {
 /**
  * Handle /search — discover metros, routes, tickets
  */
-function handleSearch(requestBody) {
+export function handleSearch(requestBody) {
   const incomingCtx = requestBody.context || {};
   const context = buildContext('on_search', {
     transaction_id: incomingCtx.transaction_id,
@@ -97,7 +97,7 @@ function handleSearch(requestBody) {
 /**
  * Handle /select — select a specific metro item/route
  */
-function handleSelect(requestBody) {
+export function handleSelect(requestBody) {
   const incomingCtx = requestBody.context || {};
   const selectedItem = requestBody.message?.order?.items?.[0] || { id: 'CMRL-SGL-TRIP' };
 
@@ -143,7 +143,7 @@ function handleSelect(requestBody) {
 /**
  * Handle /init — initialize an order
  */
-function handleInit(requestBody) {
+export function handleInit(requestBody) {
   const incomingCtx = requestBody.context || {};
 
   const context = buildContext('on_init', {
@@ -191,7 +191,7 @@ function handleInit(requestBody) {
 /**
  * Handle /confirm — confirm a booking
  */
-function handleConfirm(requestBody) {
+export function handleConfirm(requestBody) {
   const incomingCtx = requestBody.context || {};
 
   const context = buildContext('on_confirm', {
@@ -246,7 +246,7 @@ function handleConfirm(requestBody) {
 /**
  * Handle /status — check order status
  */
-function handleStatus(requestBody) {
+export function handleStatus(requestBody) {
   const incomingCtx = requestBody.context || {};
   const orderId = requestBody.message?.order_id || 'INDI-METRO-UNKNOWN';
 
@@ -278,10 +278,4 @@ function handleStatus(requestBody) {
   };
 }
 
-module.exports = {
-  handleSearch,
-  handleSelect,
-  handleInit,
-  handleConfirm,
-  handleStatus,
-};
+// Named exports used above

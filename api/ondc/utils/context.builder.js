@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Builds a standard ONDC context object for the TRV11 (metro/mobility) domain.
@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid');
  * @param {object} overrides - Optional overrides for context fields
  * @returns {object} ONDC context object
  */
-function buildContext(action, overrides = {}) {
+export function buildContext(action, overrides = {}) {
   return {
     domain: process.env.ONDC_DOMAIN || 'ONDC:TRV11',
     country: process.env.ONDC_COUNTRY || 'IND',
@@ -24,4 +24,4 @@ function buildContext(action, overrides = {}) {
   };
 }
 
-module.exports = { buildContext };
+// Named export used above

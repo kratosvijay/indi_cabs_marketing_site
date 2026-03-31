@@ -6,8 +6,8 @@
  * and returns a properly formatted ONDC response.
  */
 
-const ondcService = require('../services/ondc.service');
-const { buildContext } = require('../utils/context.builder');
+import * as ondcService from '../services/ondc.service.js';
+import { buildContext } from '../utils/context.builder.js';
 
 // ─── Buyer-Side Actions (outgoing to BPP via gateway) ───────────────────
 
@@ -15,7 +15,7 @@ const { buildContext } = require('../utils/context.builder');
  * POST /ondc/search
  * Initiates a search for metro services/routes
  */
-function search(req, res) {
+export function search(req, res) {
   try {
     console.log('🔎 [search] Processing search request');
     const response = ondcService.handleSearch(req.body);
@@ -34,7 +34,7 @@ function search(req, res) {
  * POST /ondc/select
  * Selects a specific item/service from search results
  */
-function select(req, res) {
+export function select(req, res) {
   try {
     console.log('👆 [select] Processing select request');
     const response = ondcService.handleSelect(req.body);
@@ -53,7 +53,7 @@ function select(req, res) {
  * POST /ondc/init
  * Initializes an order with billing/fulfillment details
  */
-function init(req, res) {
+export function init(req, res) {
   try {
     console.log('🚀 [init] Processing init request');
     const response = ondcService.handleInit(req.body);
@@ -72,7 +72,7 @@ function init(req, res) {
  * POST /ondc/confirm
  * Confirms a booking/order
  */
-function confirm(req, res) {
+export function confirm(req, res) {
   try {
     console.log('✔️  [confirm] Processing confirm request');
     const response = ondcService.handleConfirm(req.body);
@@ -91,7 +91,7 @@ function confirm(req, res) {
  * POST /ondc/status
  * Checks order/booking status
  */
-function status(req, res) {
+export function status(req, res) {
   try {
     console.log('📋 [status] Processing status request');
     const response = ondcService.handleStatus(req.body);
@@ -111,7 +111,7 @@ function status(req, res) {
 /**
  * POST /ondc/on_search — callback from BPP with search results
  */
-function onSearch(req, res) {
+export function onSearch(req, res) {
   console.log('📥 [on_search] Received search callback from BPP');
   console.log('   Provider:', JSON.stringify(req.body?.message?.catalog?.['bpp/descriptor'] || {}, null, 2));
   // TODO: Forward results to the Indicabs mobile app via WebSocket/FCM
@@ -121,7 +121,7 @@ function onSearch(req, res) {
 /**
  * POST /ondc/on_select — callback from BPP with selection details
  */
-function onSelect(req, res) {
+export function onSelect(req, res) {
   console.log('📥 [on_select] Received select callback from BPP');
   res.json({ message: { ack: { status: 'ACK' } } });
 }
@@ -129,7 +129,7 @@ function onSelect(req, res) {
 /**
  * POST /ondc/on_init — callback from BPP with init details
  */
-function onInit(req, res) {
+export function onInit(req, res) {
   console.log('📥 [on_init] Received init callback from BPP');
   res.json({ message: { ack: { status: 'ACK' } } });
 }
@@ -137,7 +137,7 @@ function onInit(req, res) {
 /**
  * POST /ondc/on_confirm — callback from BPP with confirmation
  */
-function onConfirm(req, res) {
+export function onConfirm(req, res) {
   console.log('📥 [on_confirm] Received confirm callback from BPP');
   res.json({ message: { ack: { status: 'ACK' } } });
 }
@@ -145,20 +145,9 @@ function onConfirm(req, res) {
 /**
  * POST /ondc/on_status — callback from BPP with status update
  */
-function onStatus(req, res) {
+export function onStatus(req, res) {
   console.log('📥 [on_status] Received status callback from BPP');
   res.json({ message: { ack: { status: 'ACK' } } });
 }
 
-module.exports = {
-  search,
-  select,
-  init,
-  confirm,
-  status,
-  onSearch,
-  onSelect,
-  onInit,
-  onConfirm,
-  onStatus,
-};
+// Named exports used above

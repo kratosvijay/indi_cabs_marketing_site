@@ -4,7 +4,7 @@
  * Handles POST /multimodal/plan
  */
 
-module.exports = (req, res) => {
+export default function(req, res) {
   // CORS Headers for cross-origin mobile app access
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

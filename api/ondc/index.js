@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const ondcRoutes = require('./routes/ondc.routes');
-const { errorHandler, notFoundHandler } = require('./middleware/error.middleware');
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import ondcRoutes from './routes/ondc.routes.js';
+import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 
 const app = express();
 
@@ -36,4 +36,4 @@ app.get('/health', (req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

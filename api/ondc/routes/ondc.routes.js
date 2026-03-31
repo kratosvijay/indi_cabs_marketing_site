@@ -4,9 +4,9 @@
  * All routes are mounted under /ondc prefix (set in index.js).
  */
 
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const controller = require('../controllers/ondc.controller');
+import * as controller from '../controllers/ondc.controller.js';
 
 // ─── Health Check ───────────────────────────────────────────────────────
 router.get('/health', (req, res) => {
@@ -34,4 +34,4 @@ router.post('/on_init', controller.onInit);
 router.post('/on_confirm', controller.onConfirm);
 router.post('/on_status', controller.onStatus);
 
-module.exports = router;
+export default router;
