@@ -9,6 +9,10 @@
       "destination": "/api/ondc/index.js"
     },
     {
+      "source": "/multimodal/plan",
+      "destination": "/api/multimodal/plan.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
