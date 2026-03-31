@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/ondc/:path*",
+      "destination": "/api/ondc/index.js"
+    },
+    {
+      "source": "/api/ondc/:path*",
+      "destination": "/api/ondc/index.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
