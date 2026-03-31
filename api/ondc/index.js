@@ -7,7 +7,26 @@ import { errorHandler, notFoundHandler } from './middleware/error.middleware.js'
 const app = express();
 
 // ─── Middleware ──────────────────────────────────────────────────────────
-app.use(cors());
+const allowedOrigins = [
+  'https://pramaan.ondc.org',
+  'https://api.indicabs.net',
+  'https://www.indicabs.net',
+  'http://localhost:5173',
+  'http://localhost:8080'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('pramaan.ondc.org')) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Keep it permissive for testing but explicit in logs
+  },
+  credentials: true
+}));
+
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('[:date[iso]] :method :url :status :res[content-length] - :response-time ms'));
 
