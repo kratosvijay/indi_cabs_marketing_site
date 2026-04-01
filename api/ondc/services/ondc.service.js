@@ -14,15 +14,16 @@ const GATEWAY_URL = process.env.ONDC_GATEWAY_URL || 'https://preprod.gateway.ond
  * Common function to send ONDC request to Gateway/BPP
  * @param {string} action - ONDC action (search, select, etc)
  * @param {object} body - Request body
+ * @param {object} customHeaders - Optional additional headers
  * @returns {promise} Axios response
  */
-async function sendToNetwork(action, body) {
+async function sendToNetwork(action, body, customHeaders = {}) {
   try {
     const url = `${GATEWAY_URL}/${action}`;
-    const headers = await getAuthHeaders(body);
+    const authHeaders = await getAuthHeaders(body);
+    const headers = { ...authHeaders, ...customHeaders };
     
     console.log(`📡 [Network] Sending /${action} to ${url}`);
-    console.log(`📜 [Network] Headers: ${JSON.stringify(headers, null, 2)}`);
     console.log(`📦 [Network] Body: ${JSON.stringify(body, null, 2)}`);
     
     const response = await axios.post(url, body, { headers, timeout: 5000 });
@@ -42,24 +43,24 @@ async function sendToNetwork(action, body) {
 /**
  * Handle /search — discover metros, routes, tickets
  */
-export async function handleSearch(requestBody) {
+export async function handleSearch(requestBody, customHeaders = {}) {
   // Use context from app or build a fresh one
   const context = requestBody.context || buildContext('search');
   const message = requestBody.message;
 
   const ondcBody = { context, message };
-  return await sendToNetwork('search', ondcBody);
+  return await sendToNetwork('search', ondcBody, customHeaders);
 }
 
 /**
  * Handle /select — select a specific metro item/route
  */
-export async function handleSelect(requestBody) {
+export async function handleSelect(requestBody, customHeaders = {}) {
   const context = requestBody.context || buildContext('select');
   const message = requestBody.message;
 
   const ondcBody = { context, message };
-  return await sendToNetwork('select', ondcBody);
+  return await sendToNetwork('select', ondcBody, customHeaders);
 }
 
 /**

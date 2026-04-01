@@ -54,7 +54,15 @@ export async function triggerTest(req, res) {
     };
 
     console.log(`🧪 [Trigger] Initiating mock Search transaction: ${transactionId}`);
-    const result = await ondcService.handleSearch(payload);
+    
+    // Include Pramaan headers if available to help the integration bench match the request
+    const customHeaders = {};
+    if (process.env.PRAMAAN_INTEREST_ID) {
+      customHeaders['X-Pramaan-Interest-Id'] = process.env.PRAMAAN_INTEREST_ID;
+    }
+
+    // Update handleSearch to accept customHeaders
+    const result = await ondcService.handleSearch(payload, customHeaders);
     
     res.json({
       status: 'success',
