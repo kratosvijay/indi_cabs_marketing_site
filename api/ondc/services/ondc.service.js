@@ -1,281 +1,93 @@
 /**
- * ONDC Mock Service Layer
+ * ONDC Service Layer
  *
- * Generates realistic mock ONDC TRV11 (metro/mobility) responses.
- * Replace these with real ONDC gateway calls during full integration.
+ * Handles outgoing ONDC protocol messages to the Gateway.
  */
 
+import axios from 'axios';
 import { buildContext } from '../utils/context.builder.js';
+import { getAuthHeaders } from './auth.service.js';
 
-// ─── Mock Metro Catalog ─────────────────────────────────────────────────
-const MOCK_METRO_CATALOG = {
-  'bpp/descriptor': {
-    name: 'Chennai Metro Rail Limited',
-    short_desc: 'CMRL Metro Service',
-    images: [{ url: 'https://chennaimetrorail.org/logo.png' }],
-  },
-  'bpp/providers': [
-    {
-      id: 'CMRL',
-      descriptor: {
-        name: 'Chennai Metro Rail',
-        short_desc: 'Chennai Metro Rail transit service',
-      },
-      categories: [
-        { id: 'METRO', descriptor: { name: 'Metro', code: 'METRO' } },
-      ],
-      items: [
-        {
-          id: 'CMRL-SGL-TRIP',
-          descriptor: {
-            name: 'Single Journey Ticket',
-            short_desc: 'One-way metro ticket',
-            code: 'SJT',
-          },
-          price: { currency: 'INR', value: '40' },
-          category_id: 'METRO',
-          fulfillment_id: 'CMRL-FULFILL-1',
-        },
-        {
-          id: 'CMRL-RETURN-TRIP',
-          descriptor: {
-            name: 'Return Journey Ticket',
-            short_desc: 'Round-trip metro ticket',
-            code: 'RJT',
-          },
-          price: { currency: 'INR', value: '70' },
-          category_id: 'METRO',
-          fulfillment_id: 'CMRL-FULFILL-1',
-        },
-      ],
-      fulfillments: [
-        {
-          id: 'CMRL-FULFILL-1',
-          type: 'ROUTE',
-          stops: [
-            {
-              id: 'CMRL-WMSTN',
-              descriptor: { name: 'Wimco Nagar', code: 'WMSTN' },
-              location: { gps: '13.1506,80.3058' },
-              type: 'START',
-            },
-            {
-              id: 'CMRL-ARPT',
-              descriptor: { name: 'Chennai Airport', code: 'ARPT' },
-              location: { gps: '12.9941,80.1709' },
-              type: 'END',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
+const GATEWAY_URL = process.env.ONDC_GATEWAY_URL || 'https://preprod.gateway.ondc.org';
 
-// ─── Service Methods ────────────────────────────────────────────────────
+/**
+ * Common function to send ONDC request to Gateway/BPP
+ * @param {string} action - ONDC action (search, select, etc)
+ * @param {object} body - Request body
+ * @returns {promise} Axios response
+ */
+async function sendToNetwork(action, body) {
+  try {
+    const url = `${GATEWAY_URL}/${action}`;
+    const headers = await getAuthHeaders(body);
+    
+    console.log(`📡 [Network] Sending /${action} to ${url}`);
+    const response = await axios.post(url, body, { headers, timeout: 5000 });
+    
+    console.log(`✅ [Network] Response from Gateway: ${response.status} ${JSON.stringify(response.data)}`);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(`❌ [Network] Gateway Error (${error.response.status}):`, JSON.stringify(error.response.data));
+    } else {
+      console.error(`❌ [Network] Connection Error:`, error.message);
+    }
+    throw error;
+  }
+}
 
 /**
  * Handle /search — discover metros, routes, tickets
  */
-export function handleSearch(requestBody) {
-  const incomingCtx = requestBody.context || {};
-  const context = buildContext('on_search', {
-    transaction_id: incomingCtx.transaction_id,
-    message_id: incomingCtx.message_id,
-    bpp_id: 'cmrl.ondc.org',
-    bpp_uri: 'https://cmrl.ondc.org/ondc',
-  });
+export async function handleSearch(requestBody) {
+  // Use context from app or build a fresh one
+  const context = requestBody.context || buildContext('search');
+  const message = requestBody.message;
 
-  return {
-    context,
-    message: {
-      catalog: MOCK_METRO_CATALOG,
-    },
-  };
+  const ondcBody = { context, message };
+  return await sendToNetwork('search', ondcBody);
 }
 
 /**
  * Handle /select — select a specific metro item/route
  */
-export function handleSelect(requestBody) {
-  const incomingCtx = requestBody.context || {};
-  const selectedItem = requestBody.message?.order?.items?.[0] || { id: 'CMRL-SGL-TRIP' };
+export async function handleSelect(requestBody) {
+  const context = requestBody.context || buildContext('select');
+  const message = requestBody.message;
 
-  const context = buildContext('on_select', {
-    transaction_id: incomingCtx.transaction_id,
-    message_id: incomingCtx.message_id,
-  });
-
-  return {
-    context,
-    message: {
-      order: {
-        provider: {
-          id: 'CMRL',
-          descriptor: { name: 'Chennai Metro Rail' },
-        },
-        items: [
-          {
-            id: selectedItem.id || 'CMRL-SGL-TRIP',
-            descriptor: { name: 'Single Journey Ticket', code: 'SJT' },
-            price: { currency: 'INR', value: '40' },
-            quantity: { selected: { count: 1 } },
-          },
-        ],
-        quote: {
-          price: { currency: 'INR', value: '40' },
-          breakup: [
-            {
-              title: 'Base Fare',
-              price: { currency: 'INR', value: '35' },
-            },
-            {
-              title: 'GST',
-              price: { currency: 'INR', value: '5' },
-            },
-          ],
-        },
-      },
-    },
-  };
+  const ondcBody = { context, message };
+  return await sendToNetwork('select', ondcBody);
 }
 
 /**
  * Handle /init — initialize an order
  */
-export function handleInit(requestBody) {
-  const incomingCtx = requestBody.context || {};
+export async function handleInit(requestBody) {
+  const context = requestBody.context || buildContext('init');
+  const message = requestBody.message;
 
-  const context = buildContext('on_init', {
-    transaction_id: incomingCtx.transaction_id,
-    message_id: incomingCtx.message_id,
-  });
-
-  return {
-    context,
-    message: {
-      order: {
-        provider: { id: 'CMRL' },
-        items: [
-          {
-            id: 'CMRL-SGL-TRIP',
-            quantity: { selected: { count: 1 } },
-          },
-        ],
-        billing: {
-          name: 'Indicabs User',
-          email: 'user@indicabs.net',
-          phone: '+919876543210',
-        },
-        fulfillment: {
-          id: 'CMRL-FULFILL-1',
-          type: 'ROUTE',
-          stops: [
-            { id: 'CMRL-WMSTN', type: 'START' },
-            { id: 'CMRL-ARPT', type: 'END' },
-          ],
-        },
-        quote: {
-          price: { currency: 'INR', value: '40' },
-        },
-        payment: {
-          type: 'PRE-ORDER',
-          status: 'NOT-PAID',
-          collected_by: 'BAP',
-        },
-      },
-    },
-  };
+  const ondcBody = { context, message };
+  return await sendToNetwork('init', ondcBody);
 }
 
 /**
  * Handle /confirm — confirm a booking
  */
-export function handleConfirm(requestBody) {
-  const incomingCtx = requestBody.context || {};
+export async function handleConfirm(requestBody) {
+  const context = requestBody.context || buildContext('confirm');
+  const message = requestBody.message;
 
-  const context = buildContext('on_confirm', {
-    transaction_id: incomingCtx.transaction_id,
-    message_id: incomingCtx.message_id,
-  });
-
-  const orderId = `INDI-METRO-${Date.now()}`;
-
-  return {
-    context,
-    message: {
-      order: {
-        id: orderId,
-        state: 'CONFIRMED',
-        provider: { id: 'CMRL' },
-        items: [
-          {
-            id: 'CMRL-SGL-TRIP',
-            descriptor: { name: 'Single Journey Ticket' },
-            quantity: { selected: { count: 1 } },
-          },
-        ],
-        fulfillment: {
-          id: 'CMRL-FULFILL-1',
-          type: 'ROUTE',
-          state: { descriptor: { code: 'TICKET_ISSUED' } },
-          stops: [
-            { id: 'CMRL-WMSTN', type: 'START' },
-            { id: 'CMRL-ARPT', type: 'END' },
-          ],
-        },
-        payment: {
-          type: 'PRE-ORDER',
-          status: 'PAID',
-          params: {
-            amount: '40',
-            currency: 'INR',
-            transaction_id: `TXN-${Date.now()}`,
-          },
-        },
-        quote: {
-          price: { currency: 'INR', value: '40' },
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    },
-  };
+  const ondcBody = { context, message };
+  return await sendToNetwork('confirm', ondcBody);
 }
 
 /**
  * Handle /status — check order status
  */
-export function handleStatus(requestBody) {
-  const incomingCtx = requestBody.context || {};
-  const orderId = requestBody.message?.order_id || 'INDI-METRO-UNKNOWN';
+export async function handleStatus(requestBody) {
+  const context = requestBody.context || buildContext('status');
+  const message = requestBody.message;
 
-  const context = buildContext('on_status', {
-    transaction_id: incomingCtx.transaction_id,
-    message_id: incomingCtx.message_id,
-  });
-
-  return {
-    context,
-    message: {
-      order: {
-        id: orderId,
-        state: 'CONFIRMED',
-        provider: { id: 'CMRL' },
-        fulfillment: {
-          id: 'CMRL-FULFILL-1',
-          type: 'ROUTE',
-          state: {
-            descriptor: {
-              code: 'TICKET_ISSUED',
-              name: 'Ticket Issued',
-            },
-          },
-        },
-        updated_at: new Date().toISOString(),
-      },
-    },
-  };
+  const ondcBody = { context, message };
+  return await sendToNetwork('status', ondcBody);
 }
-
-// Named exports used above

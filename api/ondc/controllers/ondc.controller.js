@@ -2,7 +2,7 @@
  * ONDC Controllers
  *
  * Handles incoming ONDC API requests and callback endpoints.
- * Each controller logs the request, delegates to the service layer,
+ * Each controller logs the request, delegates to the service layer (now async),
  * and returns a properly formatted ONDC response.
  */
 
@@ -15,11 +15,11 @@ import { buildContext } from '../utils/context.builder.js';
  * POST /ondc/search
  * Initiates a search for metro services/routes
  */
-export function search(req, res) {
+export async function search(req, res) {
   try {
     console.log('🔎 [search] Processing search request');
-    const response = ondcService.handleSearch(req.body);
-    console.log('✅ [search] Response:', JSON.stringify(response.context, null, 2));
+    const response = await ondcService.handleSearch(req.body);
+    console.log('✅ [search] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [search] Error:', err.message);
@@ -34,11 +34,11 @@ export function search(req, res) {
  * POST /ondc/select
  * Selects a specific item/service from search results
  */
-export function select(req, res) {
+export async function select(req, res) {
   try {
     console.log('👆 [select] Processing select request');
-    const response = ondcService.handleSelect(req.body);
-    console.log('✅ [select] Response:', JSON.stringify(response.context, null, 2));
+    const response = await ondcService.handleSelect(req.body);
+    console.log('✅ [select] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [select] Error:', err.message);
@@ -53,11 +53,11 @@ export function select(req, res) {
  * POST /ondc/init
  * Initializes an order with billing/fulfillment details
  */
-export function init(req, res) {
+export async function init(req, res) {
   try {
     console.log('🚀 [init] Processing init request');
-    const response = ondcService.handleInit(req.body);
-    console.log('✅ [init] Response:', JSON.stringify(response.context, null, 2));
+    const response = await ondcService.handleInit(req.body);
+    console.log('✅ [init] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [init] Error:', err.message);
@@ -72,11 +72,11 @@ export function init(req, res) {
  * POST /ondc/confirm
  * Confirms a booking/order
  */
-export function confirm(req, res) {
+export async function confirm(req, res) {
   try {
     console.log('✔️  [confirm] Processing confirm request');
-    const response = ondcService.handleConfirm(req.body);
-    console.log('✅ [confirm] Response:', JSON.stringify(response.context, null, 2));
+    const response = await ondcService.handleConfirm(req.body);
+    console.log('✅ [confirm] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [confirm] Error:', err.message);
@@ -91,11 +91,11 @@ export function confirm(req, res) {
  * POST /ondc/status
  * Checks order/booking status
  */
-export function status(req, res) {
+export async function status(req, res) {
   try {
     console.log('📋 [status] Processing status request');
-    const response = ondcService.handleStatus(req.body);
-    console.log('✅ [status] Response:', JSON.stringify(response.context, null, 2));
+    const response = await ondcService.handleStatus(req.body);
+    console.log('✅ [status] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [status] Error:', err.message);
@@ -113,8 +113,12 @@ export function status(req, res) {
  */
 export function onSearch(req, res) {
   console.log('📥 [on_search] Received search callback from BPP');
-  console.log('   Provider:', JSON.stringify(req.body?.message?.catalog?.['bpp/descriptor'] || {}, null, 2));
+  // Log provider info for debugging
+  const providers = req.body?.message?.catalog?.['bpp/providers'] || [];
+  console.log(`   Found ${providers.length} providers`);
+  
   // TODO: Forward results to the Indicabs mobile app via WebSocket/FCM
+  // For Pramaan, we just need to return ACK status
   res.json({ message: { ack: { status: 'ACK' } } });
 }
 
@@ -149,5 +153,3 @@ export function onStatus(req, res) {
   console.log('📥 [on_status] Received status callback from BPP');
   res.json({ message: { ack: { status: 'ACK' } } });
 }
-
-// Named exports used above
