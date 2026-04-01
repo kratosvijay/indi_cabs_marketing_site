@@ -60,6 +60,9 @@ export async function triggerTest(req, res) {
     if (process.env.PRAMAAN_INTEREST_ID) {
       customHeaders['X-Pramaan-Interest-Id'] = process.env.PRAMAAN_INTEREST_ID;
     }
+    if (process.env.PRAMAAN_TEST_RUN_ID) {
+      customHeaders['X-Pramaan-Test-Run-Id'] = process.env.PRAMAAN_TEST_RUN_ID;
+    }
 
     // Update handleSearch to accept customHeaders
     const result = await ondcService.handleSearch(payload, customHeaders);
