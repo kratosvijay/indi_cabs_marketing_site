@@ -30,21 +30,27 @@ export async function signRequest(body) {
     const created = Math.floor(Date.now() / 1000);
     const expires = created + 10 * 60; // 10 minutes expiry
 
-    // 1. Create digest: Blake2b hash of the request body (base64 encoded)
+    // 1. Create digest: Blake2b-512 hash of the request body (base64 encoded)
     const bodyString = JSON.stringify(body);
-    const digest = libsodium.to_base64(libsodium.crypto_generichash(64, bodyString));
+    const digest = libsodium.to_base64(libsodium.crypto_generichash(64, bodyString), libsodium.base64_variants.ORIGINAL);
 
     // 2. Create signing string
     const signingString = `(created): ${created}\n(expires): ${expires}\ndigest: BLAKE-512=${digest}`;
 
-    // 3. Sign the signing string
-    const privateKeyBuffer = libsodium.from_base64(PRIVATE_KEY);
-    const signature = libsodium.to_base64(libsodium.crypto_sign_detached(signingString, privateKeyBuffer));
-
-    // 4. Format Authorization header
-    const authHeader = `Signature keyId="${SUBSCRIBER_ID}|${UNIQUE_KEY_ID}|ed25519",algorithm="ed25519",headers="(created) (expires) digest",signature="${signature}",created="${created}",expires="${expires}"`;
+    // 3. Decode private key
+    const privateKeyBuffer = Buffer.from(PRIVATE_KEY, 'base64');
     
-    console.log('✍️  [Auth] Request signed successfully');
+    if (privateKeyBuffer.length !== libsodium.crypto_sign_SECRETKEYBYTES && privateKeyBuffer.length !== 32) {
+      throw new Error(`Invalid private key length: ${privateKeyBuffer.length} bytes`);
+    }
+
+    // 4. Generate Signature
+    const signature = libsodium.to_base64(libsodium.crypto_sign_detached(signingString, privateKeyBuffer), libsodium.base64_variants.ORIGINAL);
+
+    // 5. Construct Authorization Header
+    const authHeader = `Signature keyId="${SUBSCRIBER_ID}|${UNIQUE_KEY_ID}|ed25519",algorithm="ed25519",created="${created}",expires="${expires}",headers="(created) (expires) digest",signature="${signature}"`;
+    
+    console.log('✍️  [Auth] Signature generated (ORIGINAL b64):', signature.substring(0, 10) + '...');
     return authHeader;
   } catch (error) {
     console.error('❌ [Auth] Signing Error:', error.message);
