@@ -8,8 +8,68 @@
 
 import * as ondcService from '../services/ondc.service.js';
 import { buildContext } from '../utils/context.builder.js';
+import { v4 as uuidv4 } from 'uuid';
 
 // ─── Buyer-Side Actions (outgoing to BPP via gateway) ───────────────────
+
+/**
+ * POST /ondc/trigger-test
+ * Initiates a mock search for Pramaan/ONDC testing
+ */
+export async function triggerTest(req, res) {
+  try {
+    const transactionId = uuidv4();
+    const messageId = uuidv4();
+    
+    // Create a robust TRV11 search context
+    const context = buildContext('search');
+    context.transaction_id = transactionId;
+    context.message_id = messageId;
+    context.timestamp = new Date().toISOString();
+
+    const payload = {
+      context,
+      message: {
+        intent: {
+          fulfillment: {
+            stops: [
+              {
+                type: "START",
+                location: { gps: "12.9716,77.5946" } // Bangalore MG Road
+              },
+              {
+                type: "END",
+                location: { gps: "12.9279,77.6271" } // Bangalore Koramangala
+              }
+            ]
+          },
+          provider: {
+            id: "pramaan.ondc.org/beta/preprod/mock/seller"
+          },
+          category: {
+            id: "METRO"
+          }
+        }
+      }
+    };
+
+    console.log(`🧪 [Trigger] Initiating mock Search transaction: ${transactionId}`);
+    const result = await ondcService.handleSearch(payload);
+    
+    res.json({
+      status: 'success',
+      transaction_id: transactionId,
+      message_id: messageId,
+      gateway_response: result
+    });
+  } catch (err) {
+    console.error('❌ [Trigger] Error:', err.message);
+    res.status(500).json({
+      error: 'Trigger failed',
+      message: err.message
+    });
+  }
+}
 
 /**
  * POST /ondc/search

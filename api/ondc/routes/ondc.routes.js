@@ -21,6 +21,7 @@ router.get('/health', (req, res) => {
 });
 
 // ─── Buyer-Side Actions ─────────────────────────────────────────────────
+router.post('/trigger-test', controller.triggerTest);
 router.post('/search', controller.search);
 router.post('/select', controller.select);
 router.post('/init', controller.init);
