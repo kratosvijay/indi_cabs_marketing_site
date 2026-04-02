@@ -24,11 +24,12 @@ async function sendToNetwork(action, body, customHeaders = {}) {
     const headers = { ...authHeaders, ...customHeaders };
     
     console.log(`📡 [Network] Sending /${action} to ${url}`);
+    console.log(`📦 [Network] Headers: ${JSON.stringify(headers, null, 2)}`);
     console.log(`📦 [Network] Body: ${JSON.stringify(body, null, 2)}`);
     
     const response = await axios.post(url, body, { headers, timeout: 5000 });
     
-    console.log(`✅ [Network] Response from Gateway: ${response.status} ${JSON.stringify(response.data)}`);
+    console.log(`✅ [Network] Gateway Response (${response.status}):`, JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
     if (error.response) {

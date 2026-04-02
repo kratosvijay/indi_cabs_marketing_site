@@ -8,11 +8,6 @@ import { v4 as uuidv4 } from 'uuid';
  * required for ONDC protocol compliance.
  */
 
-// Load private key from environment
-const PRIVATE_KEY = process.env.ONDC_SIGNING_PRIVATE_KEY;
-const SUBSCRIBER_ID = process.env.ONDC_SUBSCRIBER_ID || 'indicabs.net';
-const UNIQUE_KEY_ID = process.env.ONDC_UNIQUE_KEY_ID || '884'; // Example key ID from Pramaan
-
 /**
  * Sign an outgoing request body
  * @param {object} body - The request body to sign
@@ -22,9 +17,14 @@ export async function signRequest(body) {
   try {
     await libsodium.ready;
     
-    if (!PRIVATE_KEY) {
-      console.warn('⚠️  [Auth] ONDC_SIGNING_PRIVATE_KEY not found. Using placeholder signature.');
-      return 'Signature keyId="indicabs.net|key1|ed25519",algorithm="ed25519",headers="(created) (expires) digest",signature="<placeholder>"';
+    // 🔍 Dynamically load config to ensure .env updates are caught
+    const privateKey = process.env.ONDC_SIGNING_PRIVATE_KEY;
+    const subscriberId = process.env.ONDC_SUBSCRIBER_ID || 'api.indicabs.net';
+    const uniqueKeyId = process.env.ONDC_UNIQUE_KEY_ID || 'prev-key-id';
+
+    if (!privateKey) {
+      console.warn('⚠️  [Auth] ONDC_SIGNING_PRIVATE_KEY NOT FOUND. Using placeholder signature.');
+      return `Signature keyId="${subscriberId}|${uniqueKeyId}|ed25519",algorithm="ed25519",headers="(created) (expires) digest",signature="<placeholder>"`;
     }
 
     const created = Math.floor(Date.now() / 1000);
@@ -36,9 +36,16 @@ export async function signRequest(body) {
 
     // 2. Create signing string
     const signingString = `(created): ${created}\n(expires): ${expires}\ndigest: BLAKE-512=${digest}`;
+    
+    console.log('📝 [Auth] Signing Details:', {
+      created,
+      expires,
+      digest,
+      signingString: signingString.replace(/\n/g, '\\n')
+    });
 
     // 3. Decode private key
-    const privateKeyBuffer = Buffer.from(PRIVATE_KEY, 'base64');
+    const privateKeyBuffer = Buffer.from(privateKey, 'base64');
     
     if (privateKeyBuffer.length !== libsodium.crypto_sign_SECRETKEYBYTES && privateKeyBuffer.length !== 32) {
       throw new Error(`Invalid private key length: ${privateKeyBuffer.length} bytes`);
@@ -48,9 +55,9 @@ export async function signRequest(body) {
     const signature = libsodium.to_base64(libsodium.crypto_sign_detached(signingString, privateKeyBuffer), libsodium.base64_variants.ORIGINAL);
 
     // 5. Construct Authorization Header
-    const authHeader = `Signature keyId="${SUBSCRIBER_ID}|${UNIQUE_KEY_ID}|ed25519",algorithm="ed25519",created="${created}",expires="${expires}",headers="(created) (expires) digest",signature="${signature}"`;
+    const authHeader = `Signature keyId="${subscriberId}|${uniqueKeyId}|ed25519",algorithm="ed25519",created="${created}",expires="${expires}",headers="(created) (expires) digest",signature="${signature}"`;
     
-    console.log('✍️  [Auth] Signature generated (ORIGINAL b64):', signature.substring(0, 10) + '...');
+    console.log('✍️  [Auth] Authorization Header:', authHeader);
     return authHeader;
   } catch (error) {
     console.error('❌ [Auth] Signing Error:', error.message);

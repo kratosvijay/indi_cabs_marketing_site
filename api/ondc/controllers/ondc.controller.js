@@ -9,6 +9,8 @@
 import * as ondcService from '../services/ondc.service.js';
 import { buildContext } from '../utils/context.builder.js';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import path from 'path';
 
 // ─── Buyer-Side Actions (outgoing to BPP via gateway) ───────────────────
 
@@ -89,13 +91,30 @@ export async function triggerTest(req, res) {
 export async function search(req, res) {
   try {
     console.log('🔎 [search] Processing search request');
-    const response = await ondcService.handleSearch(req.body);
+    
+    // Forward Pramaan tracking headers if they exist to help the integration bench match the request
+    const customHeaders = {};
+    if (req.headers['x-pramaan-interest-id']) {
+      customHeaders['X-Pramaan-Interest-Id'] = req.headers['x-pramaan-interest-id'];
+    }
+    if (req.headers['x-pramaan-test-run-id']) {
+      customHeaders['X-Pramaan-Test-Run-Id'] = req.headers['x-pramaan-test-run-id'];
+    }
+
+    await ondcService.handleSearch(req.body, customHeaders);
     console.log('✅ [search] Gateway ACK received');
-    res.json(response);
+    res.json({
+      message: {
+        ack: {
+          status: "ACK"
+        }
+      }
+    });
   } catch (err) {
     console.error('❌ [search] Error:', err.message);
+    const context = req.body?.context || buildContext('search');
     res.status(500).json({
-      context: buildContext('search'),
+      context,
       error: { type: 'CORE-ERROR', code: '50001', message: err.message },
     });
   }
@@ -108,13 +127,24 @@ export async function search(req, res) {
 export async function select(req, res) {
   try {
     console.log('👆 [select] Processing select request');
-    const response = await ondcService.handleSelect(req.body);
+    console.log('📦 [select] Incoming Body:', JSON.stringify(req.body, null, 2));
+    
+    const customHeaders = {};
+    if (req.headers['x-pramaan-interest-id']) {
+      customHeaders['X-Pramaan-Interest-Id'] = req.headers['x-pramaan-interest-id'];
+    }
+    if (req.headers['x-pramaan-test-run-id']) {
+      customHeaders['X-Pramaan-Test-Run-Id'] = req.headers['x-pramaan-test-run-id'];
+    }
+
+    const response = await ondcService.handleSelect(req.body, customHeaders);
     console.log('✅ [select] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [select] Error:', err.message);
+    const context = req.body?.context || buildContext('select');
     res.status(500).json({
-      context: buildContext('select'),
+      context,
       error: { type: 'CORE-ERROR', code: '50001', message: err.message },
     });
   }
@@ -127,13 +157,23 @@ export async function select(req, res) {
 export async function init(req, res) {
   try {
     console.log('🚀 [init] Processing init request');
-    const response = await ondcService.handleInit(req.body);
+    
+    const customHeaders = {};
+    if (req.headers['x-pramaan-interest-id']) {
+      customHeaders['X-Pramaan-Interest-Id'] = req.headers['x-pramaan-interest-id'];
+    }
+    if (req.headers['x-pramaan-test-run-id']) {
+      customHeaders['X-Pramaan-Test-Run-Id'] = req.headers['x-pramaan-test-run-id'];
+    }
+
+    const response = await ondcService.handleInit(req.body, customHeaders);
     console.log('✅ [init] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [init] Error:', err.message);
+    const context = req.body?.context || buildContext('init');
     res.status(500).json({
-      context: buildContext('init'),
+      context,
       error: { type: 'CORE-ERROR', code: '50001', message: err.message },
     });
   }
@@ -146,13 +186,23 @@ export async function init(req, res) {
 export async function confirm(req, res) {
   try {
     console.log('✔️  [confirm] Processing confirm request');
-    const response = await ondcService.handleConfirm(req.body);
+    
+    const customHeaders = {};
+    if (req.headers['x-pramaan-interest-id']) {
+      customHeaders['X-Pramaan-Interest-Id'] = req.headers['x-pramaan-interest-id'];
+    }
+    if (req.headers['x-pramaan-test-run-id']) {
+      customHeaders['X-Pramaan-Test-Run-Id'] = req.headers['x-pramaan-test-run-id'];
+    }
+
+    const response = await ondcService.handleConfirm(req.body, customHeaders);
     console.log('✅ [confirm] Gateway ACK received');
     res.json(response);
   } catch (err) {
     console.error('❌ [confirm] Error:', err.message);
+    const context = req.body?.context || buildContext('confirm');
     res.status(500).json({
-      context: buildContext('confirm'),
+      context,
       error: { type: 'CORE-ERROR', code: '50001', message: err.message },
     });
   }
@@ -165,7 +215,16 @@ export async function confirm(req, res) {
 export async function status(req, res) {
   try {
     console.log('📋 [status] Processing status request');
-    const response = await ondcService.handleStatus(req.body);
+    
+    const customHeaders = {};
+    if (req.headers['x-pramaan-interest-id']) {
+      customHeaders['X-Pramaan-Interest-Id'] = req.headers['x-pramaan-interest-id'];
+    }
+    if (req.headers['x-pramaan-test-run-id']) {
+      customHeaders['X-Pramaan-Test-Run-Id'] = req.headers['x-pramaan-test-run-id'];
+    }
+
+    const response = await ondcService.handleStatus(req.body, customHeaders);
     console.log('✅ [status] Gateway ACK received');
     res.json(response);
   } catch (err) {
@@ -183,44 +242,38 @@ export async function status(req, res) {
  * POST /ondc/on_search — callback from BPP with search results
  */
 export function onSearch(req, res) {
-  console.log('📥 [on_search] Received search callback from BPP');
-  // Log provider info for debugging
-  const providers = req.body?.message?.catalog?.['bpp/providers'] || [];
-  console.log(`   Found ${providers.length} providers`);
-  
-  // TODO: Forward results to the Indicabs mobile app via WebSocket/FCM
-  // For Pramaan, we just need to return ACK status
-  res.json({ message: { ack: { status: 'ACK' } } });
+  console.log("ON_SEARCH received", JSON.stringify(req.body, null, 2));
+  res.json({ message: { ack: { status: "ACK" } } });
 }
 
 /**
  * POST /ondc/on_select — callback from BPP with selection details
  */
 export function onSelect(req, res) {
-  console.log('📥 [on_select] Received select callback from BPP');
-  res.json({ message: { ack: { status: 'ACK' } } });
+  console.log("ON_SELECT received");
+  res.json({ message: { ack: { status: "ACK" } } });
 }
 
 /**
  * POST /ondc/on_init — callback from BPP with init details
  */
 export function onInit(req, res) {
-  console.log('📥 [on_init] Received init callback from BPP');
-  res.json({ message: { ack: { status: 'ACK' } } });
+  console.log("ON_INIT received");
+  res.json({ message: { ack: { status: "ACK" } } });
 }
 
 /**
  * POST /ondc/on_confirm — callback from BPP with confirmation
  */
 export function onConfirm(req, res) {
-  console.log('📥 [on_confirm] Received confirm callback from BPP');
-  res.json({ message: { ack: { status: 'ACK' } } });
+  console.log("ON_CONFIRM received");
+  res.json({ message: { ack: { status: "ACK" } } });
 }
 
 /**
  * POST /ondc/on_status — callback from BPP with status update
  */
 export function onStatus(req, res) {
-  console.log('📥 [on_status] Received status callback from BPP');
-  res.json({ message: { ack: { status: 'ACK' } } });
+  console.log("ON_STATUS received");
+  res.json({ message: { ack: { status: "ACK" } } });
 }
