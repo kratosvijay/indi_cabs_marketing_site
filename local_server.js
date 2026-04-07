@@ -2,10 +2,20 @@ import express from 'express';
 import ondcApp from './api/ondc/index.js';
 import multimodalPlan from './api/multimodal/plan.js';
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+
+// 🔍 Explicitly load .env from the project root
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const app = express();
 const PORT = 8081;
+
+// 🛡️ ONDC Startup Check
+if (process.env.ONDC_SIGNING_PRIVATE_KEY) {
+  console.log('✅ ONDC Signing Key found in environment.');
+} else {
+  console.error('❌ ONDC_SIGNING_PRIVATE_KEY is MISSING in environment. Please check your .env file.');
+}
 
 app.use(express.json());
 

@@ -14,7 +14,7 @@ function App() {
     const location = useLocation();
 
     useEffect(() => {
-        const baseUrl = 'https://indicabs.net';
+        const baseUrl = 'https://www.indicabs.net';
         const path = location.pathname === '/' ? '' : location.pathname;
         const canonicalUrl = `${baseUrl}${path}`;
 

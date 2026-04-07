@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://indicabs.net/sitemap.xml
+Sitemap: https://www.indicabs.net/sitemap.xml
